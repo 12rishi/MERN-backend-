@@ -3,10 +3,15 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import "./database/connection";
 import userRoute from "./routes/userRoute";
+import adminSeeder from "./adminSeeder";
+import productRoute from "./routes/productRoute";
 
 const app: Application = express();
+
 app.use(express.json());
 app.use("", userRoute);
+app.use("/admin", productRoute);
+adminSeeder();
 const PORT: number = Number(process.env.PORT) || 3000;
 
 app.listen(PORT, () => {
