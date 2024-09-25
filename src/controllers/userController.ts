@@ -56,6 +56,7 @@ class AuthController {
       message: "successfully login",
       data: token,
     });
+    
   }
 }
 export default AuthController;

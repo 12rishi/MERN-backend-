@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import User from "../database/models/userModel";
 dotenv.config();
-interface AuthHandler extends Request {
+export interface AuthHandler extends Request {
   user?: {
     id: string;
     userName: string;

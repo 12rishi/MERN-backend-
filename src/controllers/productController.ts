@@ -1,11 +1,26 @@
 import { Request, Response } from "express";
 import Product from "../database/models/productModel";
+import { AuthHandler } from "../middleware/authMiddleware";
+import User from "../database/models/userModel";
+import Category from "../database/models/categoryModel";
 
 class ProductController {
-  async addproduct(req: Request, res: Response): Promise<void> {
-    const { productName, productDescription, productPrice, productQty } =
-      req.body;
-    if (!productDescription || !productName || !productPrice || !productQty) {
+  async addproduct(req: AuthHandler, res: Response): Promise<void> {
+    const id = req.user?.id;
+    const {
+      productName,
+      productDescription,
+      productPrice,
+      productQty,
+      categoryId,
+    } = req.body;
+    if (
+      !productDescription ||
+      !productName ||
+      !productPrice ||
+      !productQty ||
+      !categoryId
+    ) {
       res.status(400).json({
         message: "please provide all the details",
       });
@@ -24,11 +39,31 @@ class ProductController {
       productPrice,
       productQty,
       productImageUrl: fileName,
+      userId: id,
+      categoryId,
     });
     res.status(200).json({
       message: "successfully added the product",
     });
     return;
+  }
+  async getAllProduct(req: Request, res: Response): Promise<void> {
+    const data = await Product.findAll({
+      include: [
+        {
+          model: User,
+          attributes: ["id", "userName", "email"],
+        },
+        {
+          model: Category,
+          attributes: ["id", "categoryName"],
+        },
+      ],
+    });
+    res.status(200).json({
+      message: "successfully fetched the message",
+      data: data,
+    });
   }
 }
 export default new ProductController();
