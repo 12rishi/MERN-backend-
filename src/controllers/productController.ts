@@ -65,5 +65,44 @@ class ProductController {
       data: data,
     });
   }
+  async getSingleProduct(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
+    if (!id) {
+      res.status(404).json({
+        message: "please select the item",
+      });
+      return;
+    }
+    const data = await Product.findByPk(id);
+    if (!data) {
+      res.status(404).json({
+        message: "data is not found for the given id",
+      });
+    } else {
+      res.status(200).json({
+        message: "successfully fetched the data for single product",
+        data: data,
+      });
+    }
+    return;
+  }
+  async deleteSingleProduct(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
+    if (!id) {
+      res.status(400).json({
+        message: "please provide the id ",
+      });
+    } else {
+      await Product.destroy({
+        where: {
+          id: id,
+        },
+      });
+      res.status(204).json({
+        message: "successfully deleted",
+      });
+    }
+    return;
+  }
 }
 export default new ProductController();
