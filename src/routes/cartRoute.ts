@@ -6,4 +6,8 @@ router
   .route("/cart")
   .post(authMiddleware.isAuthenticated, cartController.addCart)
   .get(authMiddleware.isAuthenticated, cartController.getAllcart);
+router
+  .route("/cart/:id")
+  .patch(authMiddleware.isAuthenticated, cartController.updateCart)
+  .get(authMiddleware.isAuthenticated, cartController.deleteCart);
 export default router;
