@@ -1,8 +1,11 @@
-import { Sequelize } from "sequelize-typescript";
+import { ForeignKey, Sequelize } from "sequelize-typescript";
 import User from "./models/userModel";
 import Product from "./models/productModel";
 import Category from "./models/categoryModel";
 import Cart from "./models/cartModel";
+import Order from "./models/orderModel";
+import OrderDetail from "./models/OrderDetail";
+import Payment from "./models/payment";
 
 const sequelize = new Sequelize({
   database: process.env.DB_NAME,
@@ -34,3 +37,9 @@ Product.hasMany(Cart, { foreignKey: "productId" });
 Cart.belongsTo(Product, { foreignKey: "productId" });
 User.hasMany(Cart, { foreignKey: "userId" });
 Cart.belongsTo(User, { foreignKey: "userId" });
+Order.hasMany(OrderDetail, { foreignKey: "orderId" });
+OrderDetail.belongsTo(Order, { foreignKey: "orderId" });
+Product.hasMany(OrderDetail, { foreignKey: "productId" });
+OrderDetail.belongsTo(Product, { foreignKey: "productId" });
+Payment.hasOne(Order, { foreignKey: "paymentId" });
+Order.belongsTo(Payment, { foreignKey: "paymentId" });
