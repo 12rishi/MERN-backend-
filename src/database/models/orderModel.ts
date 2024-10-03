@@ -22,6 +22,12 @@ class Order extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
+    validate: {
+      len: {
+        args: [10, 10],
+        msg: "phoneNumber must be of 10 digit",
+      },
+    },
   })
   declare phoneNumber: number;
   @Column({

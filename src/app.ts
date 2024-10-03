@@ -8,6 +8,7 @@ import productRoute from "./routes/productRoute";
 import categoryController from "./controllers/categoryController";
 import categoryRoute from "./routes/categoryRoute";
 import cartCategory from "./routes/cartRoute";
+import orderRoute from "./routes/orderRoutes";
 
 const app: Application = express();
 
@@ -16,6 +17,7 @@ app.use("", userRoute);
 app.use("/admin", productRoute);
 app.use("/admin/", categoryRoute);
 app.use("/customer", cartCategory);
+app.use("/customer/order", orderRoute);
 adminSeeder();
 const PORT: number = Number(process.env.PORT) || 3000;
 
