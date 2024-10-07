@@ -32,22 +32,24 @@ class AuthMiddleware {
     jwt.verify(
       token,
       process.env.JWT_KEY as string,
-      async (err, decoded: any) => {
+      async (err, decoded: any): Promise<void> => {
         if (err) {
           res.status(403).json({
             message: "invalid token",
           });
         } else {
           try {
+            console.log("id is ", decoded.id);
             const data = await User.findByPk(decoded.id);
+
             if (!data) {
               res.status(404).json({
-                message: "no use has been found for this id",
+                message: "no user has been found for this id",
               });
-              return;
+            } else {
+              req.user = data;
+              next();
             }
-            req.user = data;
-            next();
           } catch (error: any) {
             res.status(500).json({
               message: "something went wrong",

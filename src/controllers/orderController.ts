@@ -20,7 +20,7 @@ class OrderController {
     if (
       !phoneNumber ||
       !shippingAddress ||
-      !!totalAmount ||
+      !totalAmount ||
       !paymentDetails ||
       !paymentDetails.paymentMethod ||
       items.length == 0
@@ -49,34 +49,41 @@ class OrderController {
       });
     }
     if (paymentDetails.paymentMethod === PaymentMethod.Khalti) {
+      console.log("hello i am inside khalti");
       //khalti integration
       const data = {
         return_url: "http://localhost:3000/success",
         website_url: "http://localhost:3000",
         purchase_order_id: orderData.id,
         purchase_order_name: `orderName ${orderData.id}`,
+        amount: orderData.totalAmount * 100,
       };
-      const response = await axios.post(
-        `https://a.khalti.com/api/v2/epayment/initiate/`,
-        data,
-        {
-          headers: {
-            Authorization: `key 3588251e4d8f425590ca7cc79fdc7c03`,
-          },
-        }
-      );
-      const khaltiResponse: khaltiResponse = response.data;
-      paymentData.pidx = khaltiResponse.pidx;
-      await paymentData.save();
-      res.status(200).json({
-        message: "order placed successfully",
-        url: khaltiResponse.payment_url,
-      });
-    } else {
-      res.status(200).json({
-        message: "order placed successfully",
-      });
-      return;
+      try {
+        const response = await axios.post(
+          `https://a.khalti.com/api/v2/epayment/initiate/`,
+          data,
+          {
+            headers: {
+              Authorization: `key 3588251e4d8f425590ca7cc79fdc7c03`,
+            },
+          }
+        );
+
+        const khaltiResponse: khaltiResponse = response.data;
+        console.log("khaltiResponse", khaltiResponse);
+        paymentData.pidx = khaltiResponse.pidx;
+        await paymentData.save();
+        res.status(200).json({
+          message: "order placed successfully",
+          url: khaltiResponse.payment_url,
+        });
+      } catch (error: any) {
+        console.error("Error during Khalti integration:", error);
+        res.status(500).json({
+          message: "Khalti integration failed",
+          error: error.message,
+        });
+      }
     }
   }
 }
