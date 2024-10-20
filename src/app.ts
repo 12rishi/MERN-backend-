@@ -17,7 +17,7 @@ app.use("", userRoute);
 app.use("/admin", productRoute);
 app.use("/admin/", categoryRoute);
 app.use("/customer", cartCategory);
-app.use("/customer/order", orderRoute);
+app.use("/order", orderRoute);
 adminSeeder();
 const PORT: number = Number(process.env.PORT) || 3000;
 

@@ -33,4 +33,23 @@ router
 
     handleError(orderController.fetchOrderDetails)
   );
+router
+  .route("/admin/payment/:id")
+  .patch(
+    authMiddleware.isAuthenticated,
+    authMiddleware.restrictTo(Role.Admin),
+    handleError(orderController.changePaymentStatus)
+  );
+router
+  .route("/admin/:id")
+  .patch(
+    authMiddleware.isAuthenticated,
+    authMiddleware.restrictTo(Role.Admin),
+    handleError(orderController.changeOrderStatus)
+  )
+  .delete(
+    authMiddleware.isAuthenticated,
+    authMiddleware.restrictTo(Role.Admin),
+    handleError(orderController.deleteOrder)
+  );
 export default router;

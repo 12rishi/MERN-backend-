@@ -1,10 +1,11 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { AuthHandler } from "../middleware/authMiddleware";
 import {
   khaltiResponse,
   orderData,
   OrderStatus,
   PaymentMethod,
+  PaymentStatus,
   TransactionStatus,
   TransactionVerificationResponse,
 } from "../types/orderData";
@@ -14,6 +15,9 @@ import Payment from "../database/models/payment";
 import axios from "axios";
 import { UUID } from "crypto";
 import Product from "../database/models/productModel";
+class ExtendedOrder extends Order {
+  declare paymentId: string | null;
+}
 
 class OrderController {
   async createOrder(req: AuthHandler, res: Response): Promise<void> {
@@ -61,7 +65,7 @@ class OrderController {
       //khalti integration
       const data = {
         return_url: "http://localhost:3000/success",
-        website_url: "http://localhost:3000",
+        website_url: "http://localhost:3000/",
         purchase_order_id: orderData.id,
         purchase_order_name: `orderName ${orderData.id}`,
         amount: orderData.totalAmount * 100,
@@ -93,6 +97,7 @@ class OrderController {
         });
       }
     }
+    return;
   }
   async verifyKhaltiToken(req: AuthHandler, res: Response): Promise<void> {
     const { pidx } = req.body;
@@ -103,34 +108,44 @@ class OrderController {
       });
       return;
     }
-    const response = await axios.post(
-      "https://a.khalti.com/api/v2/epayment/lookup/",
-      { pidx },
-      {
-        headers: {
-          Authorization: `key 3588251e4d8f425590ca7cc79fdc7c03`,
-        },
-      }
-    );
-    const data: TransactionVerificationResponse = response.data;
-    if (data.status == TransactionStatus.Completed) {
-      await Payment.update(
+    try {
+      const response = await axios.post(
+        "https://a.khalti.com/api/v2/epayment/lookup/",
+        { pidx },
         {
-          paymentStatus: "paid",
-        },
-        {
-          where: {
-            pidx: pidx,
+          headers: {
+            Authorization: `key 3588251e4d8f425590ca7cc79fdc7c03`,
           },
         }
       );
-      res.status(200).json({
-        message: "payment verified successfully",
+      const data: TransactionVerificationResponse = response.data;
+      console.log("data of khalti is", data);
+      if (data.status == TransactionStatus.Completed) {
+        await Payment.update(
+          {
+            paymentStatus: "paid",
+          },
+          {
+            where: {
+              pidx: pidx,
+            },
+          }
+        );
+        res.status(200).json({
+          message: "payment verified successfully",
+        });
+      } else {
+        res.status(200).json({
+          message: "payment is not verified",
+        });
+      }
+      return;
+    } catch (error: any) {
+      console.log(error?.message);
+      res.status(500).json({
+        message: error.message,
       });
-    } else {
-      res.status(200).json({
-        message: "payment is not verified",
-      });
+      return;
     }
   }
   async fetchMyOrder(req: AuthHandler, res: Response): Promise<void> {
@@ -219,6 +234,67 @@ class OrderController {
       message: "successfully updated the order status",
     });
     return;
+  }
+
+  //admin controller
+  async changeOrderStatus(req: Request, res: Response): Promise<void> {
+    const orderStatus: OrderStatus = req.body.orderStatus;
+    const orderId = req.params.id;
+    await Order.update(
+      { orderStatus: orderStatus },
+      { where: { id: orderId } }
+    );
+    res.status(200).json({
+      message: "successfully updated orderStatus",
+    });
+    return;
+  }
+  async changePaymentStatus(req: Request, res: Response): Promise<void> {
+    const paymentStatus: PaymentStatus = req.body.paymentStatus;
+    const orderId = req.params.id;
+    const order = await Order.findByPk(orderId);
+    const extendedOrder: ExtendedOrder = order as ExtendedOrder;
+    await Payment.update(
+      { paymentStatus: paymentStatus },
+      {
+        where: {
+          id: extendedOrder.paymentId,
+        },
+      }
+    );
+    res.status(200).json({
+      message: "payment status updated successfully",
+    });
+  }
+  async deleteOrder(req: Request, res: Response) {
+    const orderId = req.params.id;
+    const order = await Order.findByPk(orderId);
+    const extendedOrder: ExtendedOrder = order as ExtendedOrder;
+    if (order) {
+      await OrderDetail.destroy({
+        where: {
+          orderId,
+        },
+      });
+      await Payment.destroy({
+        where: {
+          id: extendedOrder.paymentId,
+        },
+      });
+      await Order.destroy({
+        where: {
+          id: orderId,
+        },
+      });
+
+      res.status(200).json({
+        message: "successfully destroy the data",
+      });
+    } else {
+      res.status(400).json({
+        message: "no order has been found for that id ",
+      });
+    }
   }
 }
 export default new OrderController();

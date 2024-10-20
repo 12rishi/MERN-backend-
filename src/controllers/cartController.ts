@@ -22,7 +22,6 @@ class CartController {
     if (cartItem) {
       cartItem.quantity += quantity;
       await cartItem.save();
-      return;
     } else {
       cartItem = await Cart.create({
         productId,
@@ -33,8 +32,8 @@ class CartController {
         message: "successfully added cart item",
         data: cartItem,
       });
-      return;
     }
+    return;
   }
   async getAllcart(req: AuthHandler, res: Response): Promise<void> {
     const userId = req.user?.id;
