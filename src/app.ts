@@ -9,9 +9,14 @@ import categoryController from "./controllers/categoryController";
 import categoryRoute from "./routes/categoryRoute";
 import cartCategory from "./routes/cartRoute";
 import orderRoute from "./routes/orderRoutes";
+import cors from "cors";
 
 const app: Application = express();
-
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 app.use(express.json());
 app.use("", userRoute);
 app.use("/admin", productRoute);
