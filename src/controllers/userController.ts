@@ -4,8 +4,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 class AuthController {
   public static async registerUser(req: Request, res: Response): Promise<void> {
-    const { email, userName, password } = req.body;
-    if (!email || !userName || !password) {
+    const { email, username, password } = req.body;
+    if (!email || !username || !password) {
       res.status(400).json({
         message: "provide all the required fields",
       });
@@ -13,7 +13,7 @@ class AuthController {
     }
     const hashedPassword = await bcrypt.hash(password, 12);
     await User.create({
-      userName,
+      userName: username,
       email,
       password: hashedPassword,
     });
@@ -56,7 +56,6 @@ class AuthController {
       message: "successfully login",
       data: token,
     });
-    
   }
 }
 export default AuthController;
