@@ -28,9 +28,13 @@ class CartController {
         quantity,
         userId,
       });
+      const product = await Product.findByPk(productId);
       res.status(200).json({
         message: "successfully added cart item",
-        data: cartItem,
+        data: {
+          ...cartItem.toJSON(),
+          product: product?.toJSON(),
+        },
       });
     }
     return;
