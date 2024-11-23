@@ -15,6 +15,7 @@ import Payment from "../database/models/payment";
 import axios from "axios";
 import { UUID } from "crypto";
 import Product from "../database/models/productModel";
+import Cart from "../database/models/cartModel";
 class ExtendedOrder extends Order {
   declare paymentId: string | null;
 }
@@ -53,11 +54,18 @@ class OrderController {
       userId,
       paymentId: paymentData.id,
     });
+    let orderResponse;
     for (let i = 0; i < items.length; i++) {
-      await OrderDetail.create({
+      orderResponse = await OrderDetail.create({
         quantity: items[i].quantity,
         productId: items[i].productId,
         orderId: orderData.id,
+      });
+      await Cart.destroy({
+        where: {
+          productId: items[i].productId,
+          userId: userId,
+        },
       });
     }
     if (paymentDetails.paymentMethod === PaymentMethod.Khalti) {
@@ -88,6 +96,7 @@ class OrderController {
         res.status(200).json({
           message: "order placed successfully",
           url: khaltiResponse.payment_url,
+          data: orderResponse,
         });
       } catch (error: any) {
         console.error("Error during Khalti integration:", error);
