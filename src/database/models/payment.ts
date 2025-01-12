@@ -1,4 +1,3 @@
-import { STRING } from "sequelize";
 import { UUIDV4 } from "sequelize";
 import {
   Column,

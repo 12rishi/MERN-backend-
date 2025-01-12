@@ -23,6 +23,7 @@ class AuthMiddleware {
     next: NextFunction
   ): Promise<void> {
     const token = req.headers.authorization;
+
     if (!token || token === undefined || token === null) {
       res.status(403).json({
         message: "token is not valid",

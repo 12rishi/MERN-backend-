@@ -9,5 +9,5 @@ router
 router
   .route("/cart/:id")
   .patch(authMiddleware.isAuthenticated, cartController.updateCart)
-  .get(authMiddleware.isAuthenticated, cartController.deleteCart);
+  .delete(authMiddleware.isAuthenticated, cartController.deleteCart);
 export default router;

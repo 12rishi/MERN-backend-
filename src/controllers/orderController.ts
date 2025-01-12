@@ -16,12 +16,15 @@ import axios from "axios";
 import { UUID } from "crypto";
 import Product from "../database/models/productModel";
 import Cart from "../database/models/cartModel";
+import User from "../database/models/userModel";
+import Category from "../database/models/categoryModel";
 class ExtendedOrder extends Order {
   declare paymentId: string | null;
 }
 
 class OrderController {
   async createOrder(req: AuthHandler, res: Response): Promise<void> {
+    console.log("hello");
     const userId = req.user?.id;
     const {
       phoneNumber,
@@ -76,7 +79,7 @@ class OrderController {
         website_url: "http://localhost:3000/",
         purchase_order_id: orderData.id,
         purchase_order_name: `orderName ${orderData.id}`,
-        amount: orderData.totalAmount * 100,
+        amount: totalAmount * 100,
       };
       try {
         const response = await axios.post(
@@ -105,8 +108,11 @@ class OrderController {
           error: error.message,
         });
       }
+    } else {
+      res.status(200).json({
+        message: "Order placed successfully",
+      });
     }
-    return;
   }
   async verifyKhaltiToken(req: AuthHandler, res: Response): Promise<void> {
     const { pidx } = req.body;
@@ -180,6 +186,7 @@ class OrderController {
   }
   async fetchOrderDetails(req: AuthHandler, res: Response): Promise<void> {
     const orderId = req.params.id;
+    console.log("order Id is", orderId);
     if (!orderId) {
       res.status(400).json({
         message: "please provide orderId ",
@@ -191,8 +198,24 @@ class OrderController {
       where: {
         orderId,
       },
-      include: [{ model: Product }],
+      include: [
+        {
+          model: Product,
+          include: [{ model: Category, attributes: ["categoryName"] }],
+        },
+        {
+          model: Order,
+          include: [
+            { model: Payment, attributes: ["paymentMethod", "paymentStatus"] },
+            {
+              model: User,
+              attributes: ["email", "userName"],
+            },
+          ],
+        },
+      ],
     });
+    console.log("data is ", data);
     if (data.length > 0) {
       res.status(200).json({
         message: "orderDetail fetched successfully",

@@ -4,7 +4,7 @@ export interface orderData {
   totalAmount: number;
   paymentDetails: {
     paymentMethod: PaymentMethod;
-    paymentStatus: PaymentStatus;
+    paymentStatus?: PaymentStatus;
     pidx?: string;
   };
   items: orderDetails[];

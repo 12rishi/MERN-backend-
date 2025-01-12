@@ -35,7 +35,7 @@ class CategoryController {
   async findCategory(req: Request, res: Response): Promise<void> {
     const data = await Category.findAll();
     res.status(200).json({
-      message: "successfully foun dthe data",
+      message: "successfully found the data",
       data: data,
     });
     return;
