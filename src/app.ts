@@ -18,6 +18,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(express.static(".src/storage/"));
 app.use("", userRoute);
 app.use("/admin", productRoute);
 app.use("/admin/", categoryRoute);

@@ -38,7 +38,7 @@ class ProductController {
       productName,
       productPrice,
       productQty,
-      productImageUrl: fileName,
+      productImageUrl: "http://localhost:3000/" + fileName,
       userId: id,
       categoryId,
     });

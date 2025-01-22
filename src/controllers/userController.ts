@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import User from "../database/models/userModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { AuthHandler } from "../middleware/authMiddleware";
 class AuthController {
   public static async registerUser(req: Request, res: Response): Promise<void> {
     const { email, username, password } = req.body;
@@ -56,6 +57,52 @@ class AuthController {
       message: "successfully login",
       data: token,
     });
+  }
+  public static async fetchUsers(
+    req: AuthHandler,
+    res: Response
+  ): Promise<void> {
+    try {
+      const users = await User.findAll();
+      if (users.length > 0) {
+        res.status(200).json({
+          message: "successfully fetched users",
+          data: users,
+        });
+      } else {
+        res.status(400).json({
+          message: "something went wrong",
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        message: "server erro",
+        error: error,
+      });
+    }
+  }
+  public static async deleteUser(
+    req: AuthHandler,
+    res: Response
+  ): Promise<void> {
+    try {
+      const id = req.params.id;
+      if (!id) {
+        res.status(400).json({
+          message: "id is not defined",
+        });
+      } else {
+        await User.destroy({ where: { id: id } });
+        res.status(200).json({
+          message: "successfully deleted",
+        });
+      }
+    } catch (error: any) {
+      res.status(500).json({
+        message: "something went wrong",
+        error: error?.message,
+      });
+    }
   }
 }
 export default AuthController;

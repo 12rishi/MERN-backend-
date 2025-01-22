@@ -328,5 +328,22 @@ class OrderController {
       });
     }
   }
+  async fetchOrder(req: AuthHandler, res: Response): Promise<void> {
+    const data = await Order.findAll({
+      include: [{ model: Payment }, { model: User }],
+    });
+    if (data.length > 0) {
+      res.status(200).json({
+        message: "successfully fetched all the orders",
+        data: data,
+      });
+    } else {
+      res.status(404).json({
+        message: "you havenot ordered anything yet",
+        data: [],
+      });
+    }
+    return;
+  }
 }
 export default new OrderController();

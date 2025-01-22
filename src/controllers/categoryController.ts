@@ -24,11 +24,13 @@ class CategoryController {
       });
       return;
     }
-    const data = await Category.create({
+    await Category.create({
       categoryName,
     });
+    const data = await Category.findAll();
     res.status(201).json({
       message: "successfully created",
+      data,
     });
     return;
   }
